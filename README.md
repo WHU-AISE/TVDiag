@@ -61,12 +61,12 @@ The parameters in `config/experiment.yaml` are describe as follows:
 
 <B>Common args</B>
 - `dataset_name`: Which dataset you want to use.
-- `reconstruct`: This parameter reprsents Whether to regenerate the events.
+- `reconstruct`: This parameter reprsents Whether to regenerate the events. (default: False)
 
 <B>model</B>
 - `TO`: TO denotes Whether to load the task-oriented learning module. (default: True)
 - `CM`: CM denotes Whether to establish the cross-modal assciation. (default: True)
 - `guide_weight`: This parameter adjust the scale of contrastive loss. (default: 0.1)
-- `aug`: This parameter reprsents Whether to augment the dataset.
-- `aug_method`: You can use two data augmentation strategies: node_drop and random_walk. (default: node_drop). 
-- `aug_percent`:  The inactivation probability
+- `aug`: This parameter reprsents Whether to augment the dataset. (default: True)
+- `aug_method`: You can use two data augmentation strategies: node_drop and random_walk. (default: node_drop)
+- `aug_percent`:  The inactivation probability. (default: 0.2)
