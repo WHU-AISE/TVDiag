@@ -1,0 +1,64 @@
+common_args:
+  dataset_name: gaia
+#  dataset_name: aiops22-svc
+  seed: 2
+  log_every_n_steps: 20
+  eval_period: 10
+  log_dir: 'logs/'
+  reconstruct: False
+
+model:
+  graph_out: 32
+  graph_hidden: 64
+  linear_hiddens: [64]
+  lr: 0.001
+  weight_decay: 0.0001
+  TO: True
+  CM: True
+  temperature: 0.5
+  guide_weight: 0.1
+  aug: True
+  aug_percent: 0.2
+  aug_method: 'node_drop' # random_walk
+  dynamic_weight: True
+    
+
+dataset:
+  gaia:
+    epochs: 1500
+    batch_size: 512
+    N_S: 5 # number of services
+    N_I: 10 # number of instances
+    N_A: 5 # number of anomaly types
+    metric_embedding_dim: 100
+    trace_embedding_dim: 100
+    log_embedding_dim: 100
+    labels: 'raw/gaia.csv'
+    metrics: 'raw/metric.json'
+    traces: 'raw/trace.json'
+    logs: 'raw/log.npy'
+    edges: 'raw/edges.pkl'
+    nodes: 'raw/nodes.pkl'
+    sentence_embedding:
+      metric_embedding_path: 'fasttext/metric_sentence_embedding.pkl'
+      trace_embedding_path: 'fasttext/trace_sentence_embedding.pkl'
+      log_embedding_path: 'fasttext/log_sentence_embedding.pkl'
+
+  aiops22-pod:
+    epochs: 3000
+    batch_size: 512
+    N_I: 40 # number of instances
+    N_A: 9 # number of anomaly types
+    metric_embedding_dim: 100
+    trace_embedding_dim: 100
+    log_embedding_dim: 100
+    labels: 'raw/aiops22-pod.csv'
+    metrics: 'raw/metric.json'
+    traces: 'raw/trace.json'
+    logs: 'raw/log.json'
+    edges: 'raw/edges.pkl'
+    nodes: 'raw/nodes.pkl'
+    sentence_embedding:
+      metric_embedding_path: 'fasttext/metric_sentence_embedding.pkl'
+      trace_embedding_path: 'fasttext/trace_sentence_embedding.pkl'
+      log_embedding_path: 'fasttext/log_sentence_embedding.pkl'
