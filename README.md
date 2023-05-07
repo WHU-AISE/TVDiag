@@ -2,7 +2,7 @@
 
 ### TVDiag: A Task-oriented and View-invariant Failure Diagnosis Framework with Multimodal Data
 
-TVDiag is a multimodal failure diagnosis framework designed to locate the root cause and identify the failure type in microservice-based systems. This repository is the basic implementation of TVDiag.
+TVDiag is a multimodal failure diagnosis framework designed to locate the root cause and identify the failure type in microservice-based systems. This repository offers the core implementation of TVDiag.
 
 
 ## Project Structure
