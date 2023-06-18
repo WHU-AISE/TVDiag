@@ -21,7 +21,7 @@ def precision(output, target, k=5):
     _, pred = output.topk(k, 1, True, True)
     y_pred = pred.detach().numpy()
     y_true = target.detach().numpy().reshape(-1, 1)
-    pre = precision_score(y_pred[:, 0], y_true, average='weighted')
+    pre = precision_score(y_true, y_pred[:, 0], average='weighted')
 
     return pre
 
@@ -30,7 +30,7 @@ def recall(output, target, k=5):
     _, pred = output.topk(k, 1, True, True)
     y_pred = pred.detach().numpy()
     y_true = target.detach().numpy().reshape(-1, 1)
-    rec = recall_score(y_pred[:, 0], y_true, average='weighted')
+    rec = recall_score(y_true, y_pred[:, 0], average='weighted')
 
     return rec
 
@@ -39,7 +39,7 @@ def f1score(output, target, k=5):
     _, pred = output.topk(k, 1, True, True)
     y_pred = pred.detach().numpy()
     y_true = target.detach().numpy().reshape(-1, 1)
-    f1 = f1_score(y_pred[:, 0], y_true, average='weighted')
+    f1 = f1_score(y_true, y_pred[:, 0], average='weighted')
 
     return f1
 
