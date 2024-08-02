@@ -53,8 +53,8 @@ class EventProcess():
         # trace event: (edge, host, error_type)
         # log event: (instance, eventId)
 
-        # data_map = {'metric': self.metrics, 'trace': self.traces, 'log': self.logs}
-        data_map = {'trace': self.traces}
+        data_map = {'metric': self.metrics, 'trace': self.traces, 'log': self.logs}
+        # data_map = {'trace': self.traces}
         
         
         for key, data in data_map.items():
