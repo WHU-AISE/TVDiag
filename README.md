@@ -62,12 +62,11 @@ We conducted experiments on two datasets:
 
 <B>Requirements</B>
 
-```
-python=3.8.12
-pytorch=2.1.1
-dgl=2.1.0.cu118
-...
-```
+- python=3.8.12
+- pytorch=2.1.1
+- fasttext=0.9.2
+- dgl=2.1.0.cu118 (my cuda version is 11.8)
+
 
 <B>Run</B>
 
