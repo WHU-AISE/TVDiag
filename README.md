@@ -60,15 +60,18 @@ We conducted experiments on two datasets:
 
 ## Getting Started
 
-<B>Install Dependencies</B>
+<B>Requirements</B>
 
 ```
-pip install -r requirements.txt
+python=3.8.12
+pytorch=2.1.1
+dgl=2.1.0.cu118
+...
 ```
 
 <B>Run</B>
 
-You can directly run the below commands:
+You can run the below commands:
 
 ```python
 sh train.sh
