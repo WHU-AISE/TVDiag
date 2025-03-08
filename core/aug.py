@@ -42,7 +42,7 @@ def aug_random_walk(graph, root, drop_percent=0.2):
     trace = dgl.sampling.random_walk(rg, [root], length=retain_num, return_eids=False)[0]
     nodes = trace.flatten().unique()
     subgraph = dgl.node_subgraph(aug_graph, nodes, store_ids=False)
-    # subgraph = add_self_loop_if_not_in(subgraph)
+    subgraph = add_self_loop_if_not_in(subgraph)
     return subgraph
 
 

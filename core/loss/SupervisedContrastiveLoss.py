@@ -14,6 +14,7 @@ class SupConLoss(nn.Module):
     def forward(self, embeddings, labels):
         n = labels.shape[0]  # batch
         # similarity_matrix = torch.matmul(features, features.T)
+        embeddings = F.normalize(embeddings, dim=1)
         similarity_matrix = F.cosine_similarity(embeddings.unsqueeze(1), embeddings.unsqueeze(0), dim=2)
 
         mask = torch.ones_like(similarity_matrix) * (labels.expand(n, n).eq(labels.expand(n, n).t()))
@@ -33,7 +34,11 @@ class SupConLoss(nn.Module):
 
         loss_partial = -torch.log(mask_no_sim + torch.div(sim, sim_sum) + torch.eye(n, n).to(self.device))
 
-        loss = torch.sum(torch.sum(loss_partial, dim=1)) / (len(torch.nonzero(loss_partial)))
+        nonzero_count = len(torch.nonzero(loss_partial))
+        if nonzero_count == 0:
+            nonzero_count = 1
+
+        loss = torch.sum(torch.sum(loss_partial, dim=1)) / nonzero_count
 
         return loss
 

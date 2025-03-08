@@ -3,35 +3,45 @@ import torch
 from sklearn.metrics import precision_score, recall_score, f1_score
 
 
-def HR(output, target, topk=(1, 5)):
-    maxk = max(topk)
-    batch_size = target.size(0)
-    _, pred = output.topk(maxk, 1, True, True)
-    pred = pred.t()
-    correct = pred.eq(target.view(1, -1).expand_as(pred))
-    res = []
-    for k in topk:
-        correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
-        res.append((correct_k / batch_size).item())
-    return tuple(res)
 
-def NDCG(output, target, topk=(3,)):
-    maxk = max(topk)
-    batch_size = target.size(0)
-    _, pred = output.topk(maxk, 1, True, True)
-    pred = pred.t()
-    # correct for 3  (3, num)
-    # [[ True, False, True, ..., False, False],
-    #  [ False, False, False, ..., False, False],
-    #  [ False, False, False, ..., True, False]]
-    correct = pred.eq(target.view(1, -1).expand_as(pred))
-    res = []
-    for k in topk:
-        sum_correct = correct[:k].sum(1)
-        respective_score = sum_correct / torch.log2(torch.arange(len(sum_correct))+2)
-        total_score = respective_score.sum()
-        res.append((total_score / batch_size).item())
-    return tuple(res)
+def RCA_eval(root_logit, num_nodes_list, roots):
+    res = {"HR@1": [], "HR@2": [], "HR@3": [], "HR@4": [], "HR@5": [], "MRR@3": []}
+    
+    start_idx = 0
+    for idx, num_nodes in enumerate(num_nodes_list):
+        end_idx = start_idx + num_nodes
+        node_logits = root_logit[start_idx : end_idx].reshape(1, -1)
+        root = roots[start_idx : end_idx].tolist().index(1)
+
+        _, sorted_indices = torch.sort(node_logits, descending=True)
+        for j in range(1, 6):
+            # HR@k
+            if root in sorted_indices.flatten()[:j]:
+                res[f"HR@{j}"].append(1)
+            else:
+                res[f"HR@{j}"].append(0)
+        # MRR
+        rank = (sorted_indices == root).nonzero(as_tuple=True)[1].item() + 1
+        if rank <= 3:
+            res["MRR@3"].append(1 / rank)
+        else:
+            res["MRR@3"].append(0)
+
+        start_idx += num_nodes
+    for k in range(1, 6):
+        res[f'HR@{k}'] = np.sum(res[f'HR@{k}'])/len(num_nodes_list)
+    res['MRR@3'] = np.sum(res['MRR@3'])/len(num_nodes_list)
+    return res
+    
+        
+def FTI_eval(output, target, k=5):
+    res = {"pre": [], "rec": [], "f1": []}
+    res['pre']=precision(output, target, k)
+    res['rec']=recall(output, target, k)
+    res['f1']=2 * res['pre'] * res['rec'] / (res['pre'] + res['rec'])
+    return res
+
+
 
 def target_rank(output, target, k=10):
     _, pred = output.topk(k, 1, True, True)

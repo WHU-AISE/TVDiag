@@ -3,7 +3,7 @@ import random
 from typing import List
 import fasttext
 import numpy as np
-
+from helper.time_util import cost_time
 """
     adapted from:
     
@@ -27,7 +27,7 @@ class FastTextEncoder:
         for type in self.types:
             for node in self.nodes:
                 idxs = [i for i, label in enumerate(labels)
-                    if label.split('__label__')[-1] == str(self.nodes.index(node)) + str(
+                    if label.split('__label__')[-1] == node + str(
                         self.types.index(type))]
                 sample_count = len(idxs)
                 if sample_count == 0:
@@ -49,7 +49,7 @@ class FastTextEncoder:
                         chosen_text_splits[event_id] = nearest_event
                     final_data.append(
                         ' '.join(
-                            chosen_text_splits) + f'\t__label__{self.nodes.index(node)}{self.types.index(type)}\n')
+                            chosen_text_splits) + f'\t__label__{node}{self.types.index(type)}\n')
                     sample_count += 1
         
         return final_data
@@ -64,10 +64,10 @@ class FastTextEncoder:
 
         return path
 
-
-    def fit(self, data_set: List[List[str]], labels):
+    @cost_time
+    def fit(self, data_set: dict, labels: dict):
         data_set = [' '.join(events) for events in data_set]
-        data_set = [f'{text}\t{labels[i]}\n' for i, text in enumerate(data_set)]
+        data_set = [f'{text}\t{labels[idx]}\n' for idx, text in enumerate(data_set)]
         train_pth = self.save_to_txt(data_set, f'{self.modality}-train.txt')
         model = fasttext.train_supervised(
             train_pth,
@@ -75,6 +75,12 @@ class FastTextEncoder:
             minCount=1, 
             minn=0, maxn=0, epoch=self.epochs
         )
+        # model = fasttext.train_unsupervised(
+        #     train_pth,
+        #     dim=self.dim,
+        #     minCount=1, 
+        #     minn=0, maxn=0, epoch=self.epochs
+        # )
 
         # aug
         aug_data_set = self.build_datasets(data_set, labels, model)
@@ -85,6 +91,12 @@ class FastTextEncoder:
             minCount=1, 
             minn=0, maxn=0, epoch=self.epochs
         )
+        # model = fasttext.train_unsupervised(
+        #     aug_train_pth,
+        #     dim=self.dim,
+        #     minCount=1, 
+        #     minn=0, maxn=0, epoch=self.epochs
+        # )
 
         # event embedding
         self.event_dic = {}

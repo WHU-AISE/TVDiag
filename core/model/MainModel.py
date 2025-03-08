@@ -1,57 +1,66 @@
 import torch
 from torch import nn
-
-from core.model.Classifier import Classifyer
+import dgl
+from config.exp_config import Config
+from core.model.Classifier import Classifier
 from core.model.Voter import Voter
 from core.model.Encoder import Encoder
 
 
 class MainModel(nn.Module):
-    def __init__(self, args):
+    def __init__(self, config: Config):
         super(MainModel, self).__init__()
 
-        self.args = args
+        self.encoders = nn.ModuleDict()
+        for modality in config.modalities:
+            self.encoders[modality] = Encoder(
+                alert_embedding_dim=config.alert_embedding_dim,
+                graph_hidden_dim=config.graph_hidden_dim,
+                graph_out_dim=config.graph_out,
+                num_layers=config.graph_layers,
+                aggregator=config.aggregator,
+                feat_drop=config.feat_drop
+            )
 
-        self.metric_encoder = Encoder(in_dim=args.embedding_dim,
-                                      feat_drop=args.feat_drop,
-                                      attn_drop=args.attn_drop,
-                                      graph_hidden_dim=args.graph_hidden,                                
-                                      out_dim=args.graph_out,
-                                      aggregator=args.aggregator)
-        self.trace_encoder = Encoder(in_dim=args.embedding_dim,
-                                      feat_drop=args.feat_drop,
-                                      attn_drop=args.attn_drop,
-                                      graph_hidden_dim=args.graph_hidden,                                
-                                      out_dim=args.graph_out,
-                                      aggregator=args.aggregator)
-        self.log_encoder = Encoder(in_dim=args.embedding_dim,
-                                      feat_drop=args.feat_drop,
-                                      attn_drop=args.attn_drop,
-                                      graph_hidden_dim=args.graph_hidden,                                
-                                      out_dim=args.graph_out,
-                                      aggregator=args.aggregator)
-        fuse_dim = 3 * args.graph_out
+        fti_fuse_dim = len(config.modalities) * config.graph_out
+        rcl_fuse_dim = len(config.modalities) * config.graph_out
 
-        self.locator = Voter(fuse_dim, 
-                                  hiddens=args.linear_hidden,
-                                  out_dim=args.N_I)
-        self.typeClassifier = Classifyer(in_dim=fuse_dim,
-                                         hiddens=args.linear_hidden,
-                                         out_dim=args.N_T)
+        self.locator = Voter(rcl_fuse_dim,
+                             hiddens=config.linear_hidden,
+                             out_dim=1)
+        self.typeClassifier = Classifier(in_dim=fti_fuse_dim,
+                                         hiddens=config.linear_hidden,
+                                         out_dim=config.ft_num)
 
     def forward(self, batch_graphs):
-        x_m = batch_graphs.ndata['metrics']
-        x_t = batch_graphs.ndata['traces']
-        x_l = batch_graphs.ndata['logs']
-        
-        f_m = self.metric_encoder(batch_graphs, x_m)
-        f_t = self.trace_encoder(batch_graphs, x_t)
-        f_l = self.log_encoder(batch_graphs, x_l)
+        fs, es = {}, {}
+        for modality, encoder in self.encoders.items():
+            x_d = batch_graphs.ndata[modality]
+            f_d, e_d = encoder(batch_graphs, x_d) # graph-level, node-level
+            fs[modality] = f_d
+            es[modality] = e_d
 
-        f = torch.cat((f_m, f_t, f_l), dim=1)
+
+        f = torch.cat(tuple(fs.values()), dim=1)
+
         # failure type identification
         type_logit = self.typeClassifier(f)
-        # root cause localization
-        root_logit = self.locator(f)
 
-        return (f_m, f_t, f_l), root_logit, type_logit
+        # root cause localization
+        e = torch.cat(list(es.values()), dim=1)
+        root_logit = self.locator(e)
+
+        return fs, es, root_logit, type_logit
+
+
+    def message_aggregator(self, batch_graphs):
+        fs, es = {}, {}
+        for modality, encoder in self.encoders.items():
+            x_d = batch_graphs.ndata[modality]
+            f_d, e_d = encoder(batch_graphs, x_d) # graph-level, node-level
+            fs[modality] = f_d
+            es[modality] = e_d
+
+        f = torch.cat(tuple(fs.values()), dim=1)
+        e = torch.cat(tuple(es.values()), dim=1)
+        return f, e

@@ -1,12 +1,6 @@
 from datetime import datetime
 import time
 
-
-# def time2stamp(cmnttime):   #转时间戳函数
-#     cmnttime=datetime.strptime(cmnttime,'%Y-%m-%d %H:%M:%S')
-#     stamp=int(datetime.timestamp(cmnttime))
-#     return stamp * 1000
-
 def time2stamp(ctime):
     try:
         timeArray = time.strptime(ctime, '%Y-%m-%d %H:%M:%S.%f')
