@@ -37,6 +37,10 @@
 │       ├── label.csv
 │       ├── raw
 │       └── tmp
+│   └── hotel
+│       ├── label.csv
+│       ├── raw
+│       └── tmp
 ├── helper
 │   ├── complexity.py
 │   ├── early_stop.py
@@ -65,7 +69,7 @@ We conducted experiments on two datasets:
 
 - [GAIA](https://github.com/CloudWise-OpenSource/GAIA-DataSet). GAIA dataset records metrics, traces, and logs of the MicroSS simulation system in July 2021, which consists of ten microservices and some middleware such as Redis, MySQL, and Zookeeper. The extracted events of GAIA can be accessible on [DiagFusion](https://arxiv.org/abs/2302.10512).
 - [AIOps-22](https://competition.aiops-challenge.com). The AIOps-22 dataset is derived from the training data released by the AIOps 2022 Challenge, where failures at three levels (node, service, and instance) were injected into a Web-based e-commerce platform [Online-boutique](https://github.com/GoogleCloudPlatform/microservices-demo).
-- Sockshop. We deployed a well-known microservice-based system: [Sockshop](https://github.com/microservices-demo/microservices-demo) in a Kubernetes cluster. We induced diverse application failures using Chaos Mesh and gathered approximately 70GB of system telemetry data for testing.  Due to storage constraints, we only provide the extracted alert dataset. You may contact us via email to request the raw data.
+- Sockshop and HotelReservation. We deployed two well-known microservice-based systems: [Sockshop](https://github.com/microservices-demo/microservices-demo) and [HotelReservation](https://github.com/delimitrou/DeathStarBench/tree/master/hotelReservation) in a Kubernetes cluster. We induced diverse application failures using Chaos Mesh and gathered system telemetry data for testing.  Due to storage constraints, we only provide extracted alert datasets. You may contact us via email to request the raw data of two systems.
 
 ## Getting Started
 
